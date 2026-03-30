@@ -27,20 +27,23 @@
 ### 📱 UI Screenshots — 2-Grid Layout
 
 <p align="center">
-  <img src="REPLACE_WITH_SCREENSHOT_1_URL" width="45%" />
-  <img src="REPLACE_WITH_SCREENSHOT_2_URL" width="45%" />
+<img src="https://raw.githubusercontent.com/NotCapable1o/HandExchange_Assets/assets/1.png" width="45%" />
+<img src="https://raw.githubusercontent.com/NotCapable1o/HandExchange_Assets/assets/2.png" width="45%" />
 </p>
+
 <p align="center">
-  <img src="REPLACE_WITH_SCREENSHOT_3_URL" width="45%" />
-  <img src="REPLACE_WITH_SCREENSHOT_4_URL" width="45%" />
+<img src="https://raw.githubusercontent.com/NotCapable1o/HandExchange_Assets/assets/3.png" width="45%" />
+<img src="https://raw.githubusercontent.com/NotCapable1o/HandExchange_Assets/assets/4.png" width="45%" />
 </p>
+
 <p align="center">
-  <img src="REPLACE_WITH_SCREENSHOT_5_URL" width="45%" />
-  <img src="REPLACE_WITH_SCREENSHOT_6_URL" width="45%" />
+<img src="https://raw.githubusercontent.com/NotCapable1o/HandExchange_Assets/assets/5.png" width="45%" />
+<img src="https://raw.githubusercontent.com/NotCapable1o/HandExchange_Assets/assets/6.png" width="45%" />
 </p>
+
 <p align="center">
-  <img src="REPLACE_WITH_SCREENSHOT_7_URL" width="45%" />
-  <img src="REPLACE_WITH_SCREENSHOT_8_URL" width="45%" />
+<img src="https://raw.githubusercontent.com/NotCapable1o/HandExchange_Assets/assets/7.png" width="45%" />
+<img src="https://raw.githubusercontent.com/NotCapable1o/HandExchange_Assets/assets/8.png" width="45%" />
 </p>
 
 ---
@@ -90,7 +93,7 @@ dart --version   # Expected: 3.10.0+
 ### 2️⃣ Clone & Prepare Project
 
 ```powershell
-git clone https://github.com/CodderPrince/HandExchange.git
+git clone https://github.com/NotCapable1o/HandExchange.git
 cd hand_exchange
 fvm install
 fvm flutter pub get
