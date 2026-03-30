@@ -22,7 +22,7 @@
 
 > 📝 **NOTE:** Replace the APK link and screenshots with your actual assets.
 
-* **Download Android APK:** [📥 APK Link](REPLACE_WITH_YOUR_APK_LINK_HERE)
+* **Download Android APK:** [📥 APK Link](https://github.com/NotCapable1o/HandExchange_Assets/blob/apk/HandExchange.apk)
 
 ### 📱 UI Screenshots — 2-Grid Layout
 
