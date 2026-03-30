@@ -1,0 +1,17 @@
+-- 1. Create a function to update the timestamp on the parent room
+CREATE OR REPLACE FUNCTION public.handle_new_message_sync()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- This updates the chat_rooms table, which your View depends on
+  UPDATE public.chat_rooms
+  SET last_message_at = NOW()
+  WHERE id = NEW.room_id;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 2. Attach this to the messages table
+CREATE TRIGGER on_message_sent_update_room
+AFTER INSERT ON public.messages
+FOR EACH ROW
+EXECUTE FUNCTION public.handle_new_message_sync();

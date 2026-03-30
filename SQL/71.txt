@@ -1,0 +1,23 @@
+-- 1. Delete the old wide-open view
+DROP VIEW IF EXISTS public.chat_list_view;
+
+-- 2. Create the secure view
+CREATE VIEW public.chat_list_view AS
+SELECT
+    cr.id AS room_id,
+    cr.buyer_id,
+    cr.seller_id,
+    cr.last_message_at,
+    p.title AS last_product_title,
+    b.full_name AS buyer_name,
+    b.avatar_url AS buyer_avatar,
+    s.full_name AS seller_name,
+    s.avatar_url AS seller_avatar,
+    (SELECT count(*)::int FROM messages WHERE room_id = cr.id AND is_read = false AND sender_id != auth.uid()) AS unread_count,
+    (SELECT content FROM messages WHERE room_id = cr.id ORDER BY created_at DESC LIMIT 1) AS last_message_snippet
+FROM chat_rooms cr
+LEFT JOIN products p ON cr.product_id = p.id
+LEFT JOIN profiles b ON cr.buyer_id = b.id
+LEFT JOIN profiles s ON cr.seller_id = s.id
+-- THIS LINE IS THE FIX: Only show chats I am part of
+WHERE cr.buyer_id = auth.uid() OR cr.seller_id = auth.uid();

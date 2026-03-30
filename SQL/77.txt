@@ -1,0 +1,24 @@
+-- 1. Add reactions to messages if it doesn't exist
+ALTER TABLE public.messages
+ADD COLUMN IF NOT EXISTS reactions TEXT[] DEFAULT '{}';
+
+-- 2. Add an online status to profiles
+ALTER TABLE public.profiles
+ADD COLUMN IF NOT EXISTS is_online BOOLEAN DEFAULT false;
+
+-- 3. Update the view to include the new is_online status
+DROP VIEW IF EXISTS public.chat_list_view;
+CREATE VIEW public.chat_list_view AS
+SELECT
+    cr.id AS room_id,
+    cr.buyer_id, cr.seller_id, cr.last_message_at,
+    p.title AS last_product_title,
+    b.full_name AS buyer_name, b.avatar_url AS buyer_avatar, b.is_online AS buyer_online,
+    s.full_name AS seller_name, s.avatar_url AS seller_avatar, s.is_online AS seller_online,
+    (SELECT count(*)::int FROM messages WHERE room_id = cr.id AND is_read = false AND sender_id != auth.uid()) AS unread_count,
+    (SELECT content FROM messages WHERE room_id = cr.id ORDER BY created_at DESC LIMIT 1) AS last_message_snippet
+FROM chat_rooms cr
+JOIN profiles b ON cr.buyer_id = b.id
+JOIN profiles s ON cr.seller_id = s.id
+LEFT JOIN products p ON cr.product_id = p.id
+WHERE cr.buyer_id = auth.uid() OR cr.seller_id = auth.uid();

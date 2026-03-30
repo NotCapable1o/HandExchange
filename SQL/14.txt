@@ -1,0 +1,21 @@
+-- Add columns to products
+ALTER TABLE products ADD COLUMN avg_rating DECIMAL(3,2) DEFAULT 0;
+ALTER TABLE products ADD COLUMN total_ratings INT DEFAULT 0;
+
+-- Function to recalculate ratings
+CREATE OR REPLACE FUNCTION update_product_rating_stats()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE products
+    SET
+        avg_rating = (SELECT COALESCE(AVG(rating_value), 0) FROM ratings WHERE product_id = COALESCE(NEW.product_id, OLD.product_id)),
+        total_ratings = (SELECT COUNT(*) FROM ratings WHERE product_id = COALESCE(NEW.product_id, OLD.product_id))
+    WHERE id = COALESCE(NEW.product_id, OLD.product_id);
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger
+CREATE TRIGGER tr_update_rating_stats
+AFTER INSERT OR UPDATE OR DELETE ON ratings
+FOR EACH ROW EXECUTE FUNCTION update_product_rating_stats();

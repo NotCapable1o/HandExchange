@@ -1,0 +1,13 @@
+-- 1. Add the missing product_id column
+ALTER TABLE notifications
+ADD COLUMN product_id TEXT;
+
+-- 2. (Optional but recommended) Make sure the table exists correctly
+-- CREATE TABLE IF NOT EXISTS notifications (
+--   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+--   user_id UUID REFERENCES auth.users(id),
+--   title TEXT,
+--   body TEXT,
+--   product_id TEXT,
+--   created_at TIMESTAMPTZ DEFAULT now()
+-- );

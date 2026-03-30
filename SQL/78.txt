@@ -1,0 +1,8 @@
+-- 1. Enable RLS on messages
+ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
+
+-- 2. Allow users to read, insert, update (react), and delete messages
+DROP POLICY IF EXISTS "Allow full access to messages for authenticated users" ON messages;
+CREATE POLICY "Allow full access to messages for authenticated users"
+ON messages FOR ALL
+USING (auth.role() = 'authenticated');

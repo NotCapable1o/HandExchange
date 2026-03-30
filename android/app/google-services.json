@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "256492236398",
+    "project_id": "handexchange",
+    "storage_bucket": "handexchange.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:256492236398:android:c6dc5be3cd62febe2e407f",
+        "android_client_info": {
+          "package_name": "com.example.HandExchange"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCp7eVvVPjZb3pt4zsUQ2vLwZ_IQwV75Mk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

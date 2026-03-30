@@ -1,0 +1,15 @@
+-- 1. Enable RLS on your tables
+ALTER TABLE public.ratings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.favorites ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.reactions ENABLE ROW LEVEL SECURITY;
+
+-- 2. Create the "ALL" Policy (Covers Select, Insert, Update, Delete)
+-- This allows a logged-in user to manage ONLY their own data.
+CREATE POLICY "Users can manage their own ratings" ON public.ratings
+    FOR ALL TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can manage their own favorites" ON public.favorites
+    FOR ALL TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can manage their own reactions" ON public.reactions
+    FOR ALL TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);

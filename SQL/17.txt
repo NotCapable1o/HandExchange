@@ -1,0 +1,7 @@
+-- This ensures a user only has ONE rating for ONE product
+ALTER TABLE public.ratings
+ADD CONSTRAINT unique_user_product_rating UNIQUE (user_id, product_id);
+
+-- Also do it for reactions to prevent duplicate likes
+ALTER TABLE public.reactions
+ADD CONSTRAINT unique_user_product_reaction UNIQUE (user_id, product_id);

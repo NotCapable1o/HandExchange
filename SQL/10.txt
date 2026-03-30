@@ -1,0 +1,20 @@
+-- 1. CLEANUP: Delete duplicate cart items, keeping only one for each (user, product) pair
+DELETE FROM public.cart a
+USING public.cart b
+WHERE a.id < b.id
+  AND a.user_id = b.user_id
+  AND a.product_id = b.product_id;
+
+-- 2. NOW APPLY THE UNIQUE CONSTRAINT (It will work now because duplicates are gone)
+ALTER TABLE public.cart DROP CONSTRAINT IF EXISTS unique_cart_item;
+ALTER TABLE public.cart ADD CONSTRAINT unique_cart_item UNIQUE (user_id, product_id);
+
+-- 3. Update RLS Policy for Deletion
+DROP POLICY IF EXISTS "Users can delete from cart" ON public.cart;
+CREATE POLICY "Users can delete from cart" ON public.cart
+FOR DELETE USING (auth.uid() = user_id);
+
+-- 4. Update RLS Policy for Selection (Ensures you only see your own cart)
+DROP POLICY IF EXISTS "Users can view own cart" ON public.cart;
+CREATE POLICY "Users can view own cart" ON public.cart
+FOR SELECT USING (auth.uid() = user_id);

@@ -1,0 +1,8 @@
+-- 11.txt: Update Products for Map Support
+-- Add coordinates columns to the products table
+ALTER TABLE public.products
+ADD COLUMN IF NOT EXISTS lat DOUBLE PRECISION,
+ADD COLUMN IF NOT EXISTS lng DOUBLE PRECISION;
+
+-- Optional: Update existing rows with default coordinates (e.g., 0,0) if needed
+-- UPDATE public.products SET lat = 0, lng = 0 WHERE lat IS NULL;

@@ -1,0 +1,22 @@
+-- 1. Enable INSERT for Chat Rooms (So buyers can start a chat)
+DROP POLICY IF EXISTS "Users can insert chat rooms" ON public.chat_rooms;
+CREATE POLICY "Users can insert chat rooms"
+ON public.chat_rooms FOR INSERT
+WITH CHECK (auth.uid() = buyer_id);
+
+-- 2. Enable INSERT for Messages (So users can send texts)
+DROP POLICY IF EXISTS "Users can insert messages" ON public.messages;
+CREATE POLICY "Users can insert messages"
+ON public.messages FOR INSERT
+WITH CHECK (auth.uid() = sender_id);
+
+-- 3. Enable INSERT for Cart (So users can add items)
+DROP POLICY IF EXISTS "Users can insert into cart" ON public.cart;
+CREATE POLICY "Users can insert into cart"
+ON public.cart FOR INSERT
+WITH CHECK (auth.uid() = user_id);
+
+-- 4. FIX: Ensure all existing users have a profile (Crucial for Foreign Keys)
+INSERT INTO public.profiles (id, full_name)
+SELECT id, email FROM auth.users
+ON CONFLICT (id) DO NOTHING;

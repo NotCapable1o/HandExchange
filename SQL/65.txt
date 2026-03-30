@@ -1,0 +1,25 @@
+-- 1. Ensure the trigger function exists
+CREATE OR REPLACE FUNCTION refresh_chat_list()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE chat_rooms
+  SET last_message_at = NOW()
+  WHERE id = NEW.room_id;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 2. Attach trigger to messages table
+DROP TRIGGER IF EXISTS tr_refresh_chat_list ON messages;
+CREATE TRIGGER tr_refresh_chat_list
+AFTER INSERT ON messages
+FOR EACH ROW
+EXECUTE FUNCTION refresh_chat_list();
+
+-- 3. Fix Delete: Ensure the Foreign Key allows deletion
+-- If you can't delete, it's usually because 'messages' are blocking it.
+-- This ensures when a room is deleted, all messages inside it are also deleted.
+ALTER TABLE public.messages
+DROP CONSTRAINT IF EXISTS messages_room_id_fkey,
+ADD CONSTRAINT messages_room_id_fkey
+FOREIGN KEY (room_id) REFERENCES chat_rooms(id) ON DELETE CASCADE;

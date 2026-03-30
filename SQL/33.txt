@@ -1,0 +1,11 @@
+-- 1. Remove duplicates, keeping only the newest review for each user on each product
+DELETE FROM public.reviews a
+USING public.reviews b
+WHERE a.id < b.id
+  AND a.user_id = b.user_id
+  AND a.product_id = b.product_id;
+
+-- 2. Now that the data is clean, create the unique constraint
+ALTER TABLE public.reviews
+ADD CONSTRAINT one_review_per_user_per_product
+UNIQUE (user_id, product_id);

@@ -1,0 +1,11 @@
+-- Enable RLS
+ALTER TABLE public.favorites ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.reactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ratings ENABLE ROW LEVEL SECURITY;
+
+-- Create Policy: Anyone can view, but only owners can insert/delete
+CREATE POLICY "Allow public read access" ON public.reactions FOR SELECT USING (true);
+CREATE POLICY "Allow individual insert" ON public.reactions FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Allow individual delete" ON public.reactions FOR DELETE USING (auth.uid() = user_id);
+
+-- (Repeat these policies for favorites and ratings if needed)

@@ -1,0 +1,5 @@
+-- 1. Tell the database to ALWAYS default is_read to false
+ALTER TABLE public.messages ALTER COLUMN is_read SET DEFAULT false;
+
+-- 2. Instantly fix all your old, broken "null" messages
+UPDATE public.messages SET is_read = false WHERE is_read IS NULL;

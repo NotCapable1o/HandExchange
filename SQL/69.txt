@@ -1,0 +1,5 @@
+-- This allows the room to be deleted by automatically removing its messages first
+ALTER TABLE public.messages
+DROP CONSTRAINT IF EXISTS messages_room_id_fkey,
+ADD CONSTRAINT messages_room_id_fkey
+FOREIGN KEY (room_id) REFERENCES chat_rooms(id) ON DELETE CASCADE;

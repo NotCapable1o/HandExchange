@@ -1,0 +1,12 @@
+-- 1. Allow anyone to view images (Public access)
+CREATE POLICY "Public Access" ON storage.objects FOR SELECT USING (bucket_id = 'product-images');
+
+-- 2. Allow logged-in students to upload images
+CREATE POLICY "Authenticated users can upload images" ON storage.objects FOR INSERT WITH CHECK (
+  bucket_id = 'product-images' AND auth.role() = 'authenticated'
+);
+
+-- 3. Allow students to delete their own images
+CREATE POLICY "Users can delete own images" ON storage.objects FOR DELETE USING (
+  bucket_id = 'product-images' AND auth.uid() = owner
+);

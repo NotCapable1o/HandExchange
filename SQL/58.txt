@@ -1,0 +1,40 @@
+-- 1. Remove the old view completely
+DROP VIEW IF EXISTS public.chat_list_view;
+
+-- 2. Recreate the View with correct column names (full_name)
+CREATE VIEW public.chat_list_view AS
+SELECT DISTINCT ON (cr.id)
+    cr.id AS room_id,
+    cr.buyer_id,
+    cr.seller_id,
+    cr.last_message_at,
+    p.title AS last_product_title,
+    p.images AS product_images,
+    -- Using full_name as seen in your table
+    b.full_name AS buyer_name,
+    b.avatar_url AS buyer_avatar,
+    s.full_name AS seller_name,
+    s.avatar_url AS seller_avatar
+FROM chat_rooms cr
+JOIN products p ON cr.product_id = p.id
+JOIN profiles b ON cr.buyer_id = b.id
+JOIN profiles s ON cr.seller_id = s.id
+ORDER BY cr.id, cr.last_message_at DESC;
+
+-- 3. The "Bumping" logic: Update timestamp when a message is sent
+CREATE OR REPLACE FUNCTION update_room_on_message()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE chat_rooms
+  SET last_message_at = NOW()
+  WHERE id = NEW.room_id;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 4. Re-attach the trigger
+DROP TRIGGER IF EXISTS tr_refresh_chat_order ON messages;
+CREATE TRIGGER tr_refresh_chat_order
+AFTER INSERT ON messages
+FOR EACH ROW
+EXECUTE FUNCTION update_room_on_message();

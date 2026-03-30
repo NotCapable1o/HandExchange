@@ -1,0 +1,28 @@
+-- 1. Add missing columns with correct data types
+-- We use BIGINT because your 'id' column is a bigint
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS show_active_status BOOLEAN DEFAULT true;
+ALTER TABLE public.messages ADD COLUMN IF NOT EXISTS reply_to BIGINT REFERENCES messages(id);
+ALTER TABLE public.messages ADD COLUMN IF NOT EXISTS reactions JSONB DEFAULT '[]';
+
+-- 2. Recreate the Messenger View
+DROP VIEW IF EXISTS public.chat_list_view;
+
+CREATE VIEW public.chat_list_view AS
+SELECT DISTINCT ON (cr.id)
+    cr.id AS room_id,
+    cr.buyer_id,
+    cr.seller_id,
+    cr.last_message_at,
+    p.title AS last_product_title,
+    b.full_name AS buyer_name, b.avatar_url AS buyer_avatar, b.show_active_status AS buyer_active_enabled,
+    s.full_name AS seller_name, s.avatar_url AS seller_avatar, s.show_active_status AS seller_active_enabled,
+    -- Count unread messages (where you are the receiver, not sender)
+    (SELECT count(*)::int FROM messages
+     WHERE room_id = cr.id AND is_read = false AND sender_id != auth.uid()) AS unread_count,
+    -- Get last message preview
+    (SELECT content FROM messages WHERE room_id = cr.id ORDER BY created_at DESC LIMIT 1) AS last_message_snippet
+FROM chat_rooms cr
+LEFT JOIN products p ON cr.product_id = p.id
+LEFT JOIN profiles b ON cr.buyer_id = b.id
+LEFT JOIN profiles s ON cr.seller_id = s.id
+ORDER BY cr.id, cr.last_message_at DESC;

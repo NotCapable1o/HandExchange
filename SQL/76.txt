@@ -1,0 +1,14 @@
+-- 1. Enable security
+ALTER TABLE public.chat_rooms ENABLE ROW LEVEL SECURITY;
+
+-- 2. Create the missing SELECT policy
+DROP POLICY IF EXISTS "Users can view their own chat rooms" ON chat_rooms;
+CREATE POLICY "Users can view their own chat rooms"
+ON chat_rooms FOR SELECT
+USING (auth.uid() = buyer_id OR auth.uid() = seller_id);
+
+-- 3. Create the missing DELETE policy (This fixes your issue)
+DROP POLICY IF EXISTS "Users can delete their own chat rooms" ON chat_rooms;
+CREATE POLICY "Users can delete their own chat rooms"
+ON chat_rooms FOR DELETE
+USING (auth.uid() = buyer_id OR auth.uid() = seller_id);

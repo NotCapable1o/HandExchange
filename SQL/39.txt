@@ -1,0 +1,20 @@
+
+-- Create or replace the function to handle metadata updates
+CREATE OR REPLACE FUNCTION public.handle_user_update()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE public.profiles
+  SET
+    full_name = new.raw_user_meta_data->>'full_name',
+    avatar_url = new.raw_user_meta_data->>'avatar_url',
+    updated_at = NOW()
+  WHERE id = new.id;
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger this function whenever a user is updated in auth.users
+DROP TRIGGER IF EXISTS on_auth_user_updated ON auth.users;
+CREATE TRIGGER on_auth_user_updated
+  AFTER UPDATE ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_user_update();

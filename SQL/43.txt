@@ -1,0 +1,21 @@
+
+-- 1. Make sure RLS is actually on
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+-- 2. Drop any old policies that might be blocking access
+DROP POLICY IF EXISTS "Public profiles are viewable" ON public.profiles;
+DROP POLICY IF EXISTS "Profiles are viewable by everyone" ON public.profiles;
+DROP POLICY IF EXISTS "Users can view any profile" ON public.profiles;
+
+-- 3. Create a clean policy to allow reading
+CREATE POLICY "Public profiles are viewable"
+ON public.profiles
+FOR SELECT
+USING (true);
+
+-- 4. Ensure users can update THEIR OWN profile
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
+CREATE POLICY "Users can update own profile"
+ON public.profiles
+FOR UPDATE
+USING (auth.uid() = id);

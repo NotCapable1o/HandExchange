@@ -1,0 +1,41 @@
+-- 1. ADD THE MISSING COLUMN FIRST
+ALTER TABLE public.chat_rooms ADD COLUMN IF NOT EXISTS last_product_id UUID REFERENCES public.products(id);
+
+-- 2. DELETE THE OLD VIEW (Fresh start to avoid naming errors)
+DROP VIEW IF EXISTS chat_list_view;
+
+-- 3. CLEANUP DUPLICATES (Keep only the oldest room for each pair)
+DELETE FROM public.chat_rooms a
+USING public.chat_rooms b
+WHERE a.id > b.id
+  AND a.buyer_id = b.buyer_id
+  AND a.seller_id = b.seller_id;
+
+-- 4. APPLY THE UNIQUE CONSTRAINT (Now it will work)
+ALTER TABLE public.chat_rooms DROP CONSTRAINT IF EXISTS unique_chat_pair;
+ALTER TABLE public.chat_rooms ADD CONSTRAINT unique_chat_pair UNIQUE (buyer_id, seller_id);
+
+-- 5. CREATE THE FINAL VIEW
+CREATE VIEW chat_list_view AS
+SELECT
+    cr.id AS room_id,
+    cr.buyer_id,
+    cr.seller_id,
+    cr.last_message_at,
+    p.title AS last_product_title,
+    p.images AS product_images,
+    prof_seller.full_name AS seller_name,
+    prof_seller.avatar_url AS seller_avatar,
+    prof_buyer.full_name AS buyer_name,
+    prof_buyer.avatar_url AS buyer_avatar
+FROM chat_rooms cr
+LEFT JOIN products p ON cr.last_product_id = p.id
+JOIN profiles prof_seller ON cr.seller_id = prof_seller.id
+JOIN profiles prof_buyer ON cr.buyer_id = prof_buyer.id;
+
+-- 6. SET PERMISSIONS
+GRANT SELECT ON chat_list_view TO authenticated;
+
+-- 7. FIX CART PERMISSIONS (Ensures the Add to Cart button works)
+DROP POLICY IF EXISTS "Users can insert into cart" ON public.cart;
+CREATE POLICY "Users can insert into cart" ON public.cart FOR INSERT WITH CHECK (auth.uid() = user_id);

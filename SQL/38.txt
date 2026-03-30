@@ -1,0 +1,25 @@
+
+-- Drop the old view to update it
+DROP VIEW IF EXISTS chat_list_view;
+
+-- Create the updated view with avatars for both buyer and seller
+CREATE VIEW chat_list_view AS
+SELECT
+    cr.id AS room_id,
+    cr.buyer_id,
+    cr.seller_id,
+    cr.last_message_at,
+    p.title AS last_product_title,
+    p.images AS product_images,
+    -- Seller Info
+    prof_seller.full_name AS seller_name,
+    prof_seller.avatar_url AS seller_avatar,
+    -- Buyer Info
+    prof_buyer.full_name AS buyer_name,
+    prof_buyer.avatar_url AS buyer_avatar
+FROM chat_rooms cr
+LEFT JOIN products p ON cr.last_product_id = p.id
+JOIN profiles prof_seller ON cr.seller_id = prof_seller.id
+JOIN profiles prof_buyer ON cr.buyer_id = prof_buyer.id;
+
+GRANT SELECT ON chat_list_view TO authenticated;

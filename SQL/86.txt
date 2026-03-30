@@ -1,0 +1,3 @@
+-- This adds the missing column so the app stops crashing
+ALTER TABLE notifications
+ADD COLUMN IF NOT EXISTS product_id TEXT;

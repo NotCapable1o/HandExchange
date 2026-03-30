@@ -1,0 +1,25 @@
+-- 1. Create a View so the app can easily see names and titles in the Chat List
+CREATE OR REPLACE VIEW chat_list_view AS
+SELECT
+    cr.id AS room_id,
+    cr.buyer_id,
+    cr.seller_id,
+    cr.last_message_at,
+    p.title AS product_title,
+    p.images AS product_images,
+    prof_seller.full_name AS seller_name,
+    prof_buyer.full_name AS buyer_name
+FROM chat_rooms cr
+JOIN products p ON cr.product_id = p.id
+JOIN profiles prof_seller ON cr.seller_id = prof_seller.id
+JOIN profiles prof_buyer ON cr.buyer_id = prof_buyer.id;
+
+-- 2. Grant permission to see this view
+ALTER VIEW chat_list_view OWNER TO postgres;
+GRANT SELECT ON chat_list_view TO authenticated;
+
+-- 3. Final Cart Policy Fix
+DROP POLICY IF EXISTS "Users can manage own cart" ON public.cart;
+CREATE POLICY "Users can manage own cart" ON public.cart
+FOR ALL USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);

@@ -1,0 +1,10 @@
+
+-- Allow anyone to see profiles (Required to show names in the app)
+CREATE POLICY "Public profiles are viewable"
+ON public.profiles FOR SELECT
+USING (true);
+
+-- Ensure your own profile exists (Repair tool)
+INSERT INTO public.profiles (id, full_name)
+SELECT id, email FROM auth.users
+ON CONFLICT (id) DO NOTHING;

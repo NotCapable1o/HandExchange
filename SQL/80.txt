@@ -1,0 +1,54 @@
+---------------------------------------------------------
+-- PART 1: BULLETPROOF PRIVACY (ROW LEVEL SECURITY)
+---------------------------------------------------------
+ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
+
+-- Remove the old, unsafe policy
+DROP POLICY IF EXISTS "Allow full access to messages for authenticated users" ON public.messages;
+DROP POLICY IF EXISTS "Users can view their own chat room messages" ON public.messages;
+DROP POLICY IF EXISTS "Users can insert their own messages" ON public.messages;
+DROP POLICY IF EXISTS "Users can update messages in their rooms" ON public.messages;
+DROP POLICY IF EXISTS "Users can delete their own messages" ON public.messages;
+
+-- 1. READ: You can only read a message if you are the buyer or seller in that specific chat room
+CREATE POLICY "Users can view their own chat room messages"
+ON public.messages FOR SELECT
+USING (
+  EXISTS (
+    SELECT 1 FROM public.chat_rooms
+    WHERE chat_rooms.id = messages.room_id
+    AND (chat_rooms.buyer_id = auth.uid() OR chat_rooms.seller_id = auth.uid())
+  )
+);
+
+-- 2. INSERT: You can only send a message if your user ID matches the sender_id
+CREATE POLICY "Users can insert their own messages"
+ON public.messages FOR INSERT
+WITH CHECK (auth.uid() = sender_id);
+
+-- 3. UPDATE: You can update (react/read receipts) if you are part of the chat room
+CREATE POLICY "Users can update messages in their rooms"
+ON public.messages FOR UPDATE
+USING (
+  EXISTS (
+    SELECT 1 FROM public.chat_rooms
+    WHERE chat_rooms.id = messages.room_id
+    AND (chat_rooms.buyer_id = auth.uid() OR chat_rooms.seller_id = auth.uid())
+  )
+);
+
+-- 4. DELETE: You can ONLY delete a message if YOU sent it
+CREATE POLICY "Users can delete their own messages"
+ON public.messages FOR DELETE
+USING (auth.uid() = sender_id);
+
+
+---------------------------------------------------------
+-- PART 2: FIX REALTIME INSTANT REFRESH (UPDATES & DELETES)
+---------------------------------------------------------
+-- This forces PostgreSQL to send the old data when a row is updated or deleted.
+-- Without this, Flutter's StreamBuilder doesn't know WHICH message was deleted!
+ALTER TABLE public.messages REPLICA IDENTITY FULL;
+
+-- Ensure chat_rooms also broadcasts properly for the list screen
+ALTER TABLE public.chat_rooms REPLICA IDENTITY FULL;

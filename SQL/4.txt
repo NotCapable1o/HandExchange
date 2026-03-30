@@ -1,0 +1,6 @@
+-- Enable Realtime for the messages table
+alter publication supabase_realtime add table messages;
+alter publication supabase_realtime add table chat_rooms;
+
+-- Ensure chat_rooms has a product_id
+ALTER TABLE chat_rooms ADD COLUMN IF NOT EXISTS product_id UUID REFERENCES products(id);

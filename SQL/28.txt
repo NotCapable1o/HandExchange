@@ -1,0 +1,18 @@
+-- 1. Create the link (Foreign Key) between reviews and profiles
+-- This tells the database: "Each review's user_id refers to a specific profile"
+ALTER TABLE public.reviews
+ADD CONSTRAINT fk_reviews_profiles
+FOREIGN KEY (user_id)
+REFERENCES public.profiles(id)
+ON DELETE CASCADE;
+
+-- 2. Ensure RLS doesn't block the data reading
+ALTER TABLE public.reviews ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+-- 3. Open the "Select" gate for both tables
+DROP POLICY IF EXISTS "Public View Reviews" ON public.reviews;
+CREATE POLICY "Public View Reviews" ON public.reviews FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public View Profiles" ON public.profiles;
+CREATE POLICY "Public View Profiles" ON public.profiles FOR SELECT USING (true);

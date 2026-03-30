@@ -1,0 +1,15 @@
+
+-- Ensure the profiles table has the avatar_url column
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+
+-- Enable RLS on profiles so everyone can see each other's images/names
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public profiles are viewable" ON public.profiles;
+CREATE POLICY "Public profiles are viewable" ON public.profiles
+FOR SELECT USING (true);
+
+-- Allow users to update their own profile (Name and Avatar)
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
+CREATE POLICY "Users can update own profile" ON public.profiles
+FOR UPDATE USING (auth.uid() = id);

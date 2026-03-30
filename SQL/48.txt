@@ -1,0 +1,14 @@
+-- Fix Chat Rooms
+ALTER TABLE public.chat_rooms DROP CONSTRAINT IF EXISTS chat_rooms_last_product_id_fkey;
+ALTER TABLE public.chat_rooms ADD CONSTRAINT chat_rooms_last_product_id_fkey
+FOREIGN KEY (last_product_id) REFERENCES products(id) ON DELETE CASCADE;
+
+-- Fix Favorites (if you have them)
+ALTER TABLE public.favorites DROP CONSTRAINT IF EXISTS favorites_product_id_fkey;
+ALTER TABLE public.favorites ADD CONSTRAINT favorites_product_id_fkey
+FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE;
+
+-- Fix Reviews (if you have them)
+ALTER TABLE public.reviews DROP CONSTRAINT IF EXISTS reviews_product_id_fkey;
+ALTER TABLE public.reviews ADD CONSTRAINT reviews_product_id_fkey
+FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE;

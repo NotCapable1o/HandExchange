@@ -1,0 +1,23 @@
+-- Create the Orders table
+CREATE TABLE public.orders (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  total_amount DECIMAL(10, 2) NOT NULL,
+  status TEXT DEFAULT 'completed', -- e.g., 'pending', 'completed'
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Enable Row Level Security (RLS)
+ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
+
+-- Allow users to view only their own orders
+CREATE POLICY "Users can view their own orders"
+ON public.orders FOR SELECT
+TO authenticated
+USING (auth.uid() = user_id);
+
+-- Allow users to insert their own orders
+CREATE POLICY "Users can create their own orders"
+ON public.orders FOR INSERT
+TO authenticated
+WITH CHECK (auth.uid() = user_id);

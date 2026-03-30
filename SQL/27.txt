@@ -1,0 +1,23 @@
+-- 1. Disable RLS temporarily to clear the "pipes" then re-enable
+ALTER TABLE public.reviews DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.profiles DISABLE ROW LEVEL SECURITY;
+
+ALTER TABLE public.reviews ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+-- 2. Delete ALL existing policies to ensure no hidden "Deny" policies exist
+DROP POLICY IF EXISTS "Reviews are viewable by everyone" ON public.reviews;
+DROP POLICY IF EXISTS "Users can post their own reviews" ON public.reviews;
+DROP POLICY IF EXISTS "Users can delete their own reviews" ON public.reviews;
+DROP POLICY IF EXISTS "Profiles are viewable by everyone" ON public.profiles;
+
+-- 3. Create fresh, wide-open SELECT policies
+CREATE POLICY "Reviews are viewable by everyone"
+ON public.reviews FOR SELECT USING (true);
+
+CREATE POLICY "Profiles are viewable by everyone"
+ON public.profiles FOR SELECT USING (true);
+
+-- 4. Create the INSERT policy
+CREATE POLICY "Users can post their own reviews"
+ON public.reviews FOR INSERT WITH CHECK (auth.uid() = user_id);

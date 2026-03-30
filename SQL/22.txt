@@ -1,0 +1,22 @@
+-- 1. Enable RLS (In case it wasn't enabled)
+alter table public.reviews enable row level security;
+
+-- 2. Drop existing policies to avoid "already exists" errors
+drop policy if exists "Reviews are viewable by everyone" on public.reviews;
+drop policy if exists "Users can post their own reviews" on public.reviews;
+drop policy if exists "Users can delete their own reviews" on public.reviews;
+
+-- 3. Create the Viewing Policy (Publicly viewable)
+create policy "Reviews are viewable by everyone"
+on public.reviews for select
+using (true);
+
+-- 4. Create the Posting Policy (Authenticated only)
+create policy "Users can post their own reviews"
+on public.reviews for insert
+with check (auth.uid() = user_id);
+
+-- 5. Create the Delete Policy (Owner only)
+create policy "Users can delete their own reviews"
+on public.reviews for delete
+using (auth.uid() = user_id);

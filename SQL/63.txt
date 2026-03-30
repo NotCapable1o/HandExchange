@@ -1,0 +1,36 @@
+-- Step 1: Add the missing 'is_read' column to your messages table
+ALTER TABLE public.messages
+ADD COLUMN IF NOT EXISTS is_read BOOLEAN DEFAULT false;
+
+-- Step 2: Drop the old view to avoid structural conflicts
+DROP VIEW IF EXISTS public.chat_list_view;
+
+-- Step 3: Create the "Messenger" View with Unread Count and Snippets
+CREATE VIEW public.chat_list_view AS
+SELECT DISTINCT ON (cr.id)
+    cr.id AS room_id,
+    cr.buyer_id,
+    cr.seller_id,
+    cr.last_message_at,
+    p.title AS last_product_title,
+    p.images AS product_images,
+    b.full_name AS buyer_name,
+    b.avatar_url AS buyer_avatar,
+    s.full_name AS seller_name,
+    s.avatar_url AS seller_avatar,
+    -- Calculates how many messages you haven't read in this room
+    (SELECT count(*)::int
+     FROM messages
+     WHERE room_id = cr.id
+     AND is_read = false
+     AND sender_id != auth.uid()) AS unread_count,
+    -- Gets the text of the very last message
+    (SELECT content
+     FROM messages
+     WHERE room_id = cr.id
+     ORDER BY created_at DESC LIMIT 1) AS last_message_snippet
+FROM chat_rooms cr
+LEFT JOIN products p ON cr.product_id = p.id
+LEFT JOIN profiles b ON cr.buyer_id = b.id
+LEFT JOIN profiles s ON cr.seller_id = s.id
+ORDER BY cr.id, cr.last_message_at DESC;

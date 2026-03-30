@@ -1,0 +1,13 @@
+-- 1. Ensure Reviews are publicly readable
+DROP POLICY IF EXISTS "Reviews are viewable by everyone" ON public.reviews;
+CREATE POLICY "Reviews are viewable by everyone"
+ON public.reviews FOR SELECT
+USING (true);
+
+-- 2. IMPORTANT: Ensure Profiles are publicly readable
+-- Without this, the 'join' in your Flutter code will fail!
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Profiles are viewable by everyone" ON public.profiles;
+CREATE POLICY "Profiles are viewable by everyone"
+ON public.profiles FOR SELECT
+USING (true);

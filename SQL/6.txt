@@ -1,0 +1,31 @@
+-- 1. Create Profiles Table
+CREATE TABLE IF NOT EXISTS public.profiles (
+  id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
+  full_name TEXT,
+  avatar_url TEXT
+);
+
+-- 2. Create Cart Table
+CREATE TABLE IF NOT EXISTS public.cart (
+  id BIGSERIAL PRIMARY KEY,
+  user_id UUID REFERENCES auth.users ON DELETE CASCADE,
+  product_id UUID REFERENCES public.products(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_id, product_id) -- Prevents duplicate items in cart
+);
+
+-- 3. Enable Security
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.cart ENABLE ROW LEVEL SECURITY;
+
+-- 4. Add Permissions (Policies)
+-- Allow everyone to see names for Chat/Product screens
+DROP POLICY IF EXISTS "Public profiles are viewable" ON public.profiles;
+CREATE POLICY "Public profiles are viewable" ON public.profiles FOR SELECT USING (true);
+
+-- Allow users to manage only their own cart
+DROP POLICY IF EXISTS "Users can manage own cart" ON public.cart;
+CREATE POLICY "Users can manage own cart" ON public.cart FOR ALL USING (auth.uid() = user_id);
+
+-- 5. Enable Real-time for Cart
+ALTER publication supabase_realtime ADD TABLE cart;

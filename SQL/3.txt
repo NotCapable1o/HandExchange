@@ -1,0 +1,15 @@
+-- 1. Remove the old policy first to avoid the 42710 error
+DROP POLICY IF EXISTS "Users can delete own products" ON public.products;
+
+-- 2. Create the updated policy
+CREATE POLICY "Users can delete own products"
+ON public.products
+FOR DELETE
+USING (auth.uid() = seller_id);
+
+-- 3. Also do this for the Insert policy to be safe
+DROP POLICY IF EXISTS "Authenticated users can post products" ON public.products;
+CREATE POLICY "Authenticated users can post products"
+ON public.products
+FOR INSERT
+WITH CHECK (auth.role() = 'authenticated');

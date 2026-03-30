@@ -1,0 +1,9 @@
+-- This allows 'upsert' to work by identifying existing records
+ALTER TABLE public.ratings
+ADD CONSTRAINT unique_user_rating UNIQUE (user_id, product_id);
+
+ALTER TABLE public.favorites
+ADD CONSTRAINT unique_user_favorite UNIQUE (user_id, product_id);
+
+ALTER TABLE public.reactions
+ADD CONSTRAINT unique_user_reaction UNIQUE (user_id, product_id);

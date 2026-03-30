@@ -1,0 +1,22 @@
+-- 1. Create the function that will be called by the trigger
+CREATE OR REPLACE FUNCTION public.push_to_edge_function()
+RETURNS TRIGGER AS $$
+BEGIN
+  PERFORM
+    net.http_post(
+      url := 'https://your-project-ref.supabase.co/functions/v1/send-push',
+      headers := jsonb_build_object(
+        'Content-Type', 'application/json',
+        'Authorization', 'Bearer YOUR_SERVICE_ROLE_KEY'
+      ),
+      body := jsonb_build_object('record', row_to_json(NEW))
+    );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 2. Create the actual Trigger
+CREATE TRIGGER on_notification_created
+  AFTER INSERT ON public.notifications
+  FOR EACH ROW
+  EXECUTE FUNCTION public.push_to_edge_function();

@@ -1,0 +1,14 @@
+-- Create a public profiles view if it doesn't exist to get User Names
+CREATE TABLE IF NOT EXISTS public.profiles (
+  id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
+  full_name TEXT,
+  avatar_url TEXT
+);
+
+-- Ensure Cart table exists
+CREATE TABLE IF NOT EXISTS public.cart (
+  id BIGSERIAL PRIMARY KEY,
+  user_id UUID REFERENCES auth.users ON DELETE CASCADE,
+  product_id UUID REFERENCES products(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);

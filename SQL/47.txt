@@ -1,0 +1,11 @@
+CREATE OR REPLACE FUNCTION place_order(p_user_id UUID, p_total DECIMAL)
+RETURNS VOID AS $$
+BEGIN
+  -- 1. Insert into orders table
+  INSERT INTO public.orders (user_id, total_amount, status)
+  VALUES (p_user_id, p_total, 'completed');
+
+  -- 2. Clear the user's cart
+  DELETE FROM public.cart WHERE user_id = p_user_id;
+END;
+$$ LANGUAGE plpgsql;

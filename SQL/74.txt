@@ -1,0 +1,22 @@
+-- 1. Ensure the room deletion wipes everything related (The Cleanup)
+ALTER TABLE public.messages
+DROP CONSTRAINT IF EXISTS messages_room_id_fkey,
+ADD CONSTRAINT messages_room_id_fkey
+FOREIGN KEY (room_id) REFERENCES chat_rooms(id) ON DELETE CASCADE;
+
+-- 2. Re-create the View with a clear Primary Key
+DROP VIEW IF EXISTS public.chat_list_view;
+CREATE VIEW public.chat_list_view AS
+SELECT
+    cr.id AS room_id, -- This MUST be unique for Realtime to work
+    cr.buyer_id, cr.seller_id, cr.last_message_at,
+    p.title AS last_product_title,
+    b.full_name AS buyer_name, b.avatar_url AS buyer_avatar,
+    s.full_name AS seller_name, s.avatar_url AS seller_avatar,
+    (SELECT count(*)::int FROM messages WHERE room_id = cr.id AND is_read = false AND sender_id != auth.uid()) AS unread_count,
+    (SELECT content FROM messages WHERE room_id = cr.id ORDER BY created_at DESC LIMIT 1) AS last_message_snippet
+FROM chat_rooms cr
+LEFT JOIN products p ON cr.product_id = p.id
+LEFT JOIN profiles b ON cr.buyer_id = b.id
+LEFT JOIN profiles s ON cr.seller_id = s.id
+WHERE cr.buyer_id = auth.uid() OR cr.seller_id = auth.uid();

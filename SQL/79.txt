@@ -1,0 +1,6 @@
+-- Turn on Realtime broadcasts for the messages table
+ALTER PUBLICATION supabase_realtime ADD TABLE messages;
+
+-- (Optional but recommended) Do the same for your chat_rooms table
+-- so the Chat List screen also updates automatically when you delete a room
+ALTER PUBLICATION supabase_realtime ADD TABLE chat_rooms;

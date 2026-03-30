@@ -1,0 +1,27 @@
+-- 1. Create the function
+CREATE OR REPLACE FUNCTION update_product_like_count()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF (TG_OP = 'INSERT') THEN
+        IF (NEW.is_like = true) THEN
+            UPDATE products SET like_count = like_count + 1 WHERE id = NEW.product_id;
+        END IF;
+    ELSIF (TG_OP = 'DELETE') THEN
+        IF (OLD.is_like = true) THEN
+            UPDATE products SET like_count = like_count - 1 WHERE id = OLD.product_id;
+        END IF;
+    ELSIF (TG_OP = 'UPDATE') THEN
+        IF (OLD.is_like = false AND NEW.is_like = true) THEN
+            UPDATE products SET like_count = like_count + 1 WHERE id = NEW.product_id;
+        ELSIF (OLD.is_like = true AND NEW.is_like = false) THEN
+            UPDATE products SET like_count = like_count - 1 WHERE id = NEW.product_id;
+        END IF;
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 2. Create the trigger
+CREATE TRIGGER tr_update_like_count
+AFTER INSERT OR UPDATE OR DELETE ON reactions
+FOR EACH ROW EXECUTE FUNCTION update_product_like_count();

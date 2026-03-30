@@ -1,0 +1,16 @@
+-- Function to update the last_message_at timestamp
+CREATE OR REPLACE FUNCTION update_last_message_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE chat_rooms
+  SET last_message_at = NOW()
+  WHERE id = NEW.room_id;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger that runs every time a message is sent
+CREATE TRIGGER trigger_update_chat_timestamp
+AFTER INSERT ON messages
+FOR EACH ROW
+EXECUTE FUNCTION update_last_message_timestamp();

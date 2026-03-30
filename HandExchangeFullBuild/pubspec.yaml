@@ -1,0 +1,15 @@
+
+name: handexchange_full
+description: Student marketplace
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  get:
+  supabase_flutter:
+
+flutter:
+  uses-material-design: true

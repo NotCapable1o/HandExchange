@@ -1,0 +1,22 @@
+-- 1. Ensure the 'rating' column actually exists in reviews first
+ALTER TABLE public.reviews
+ADD COLUMN IF NOT EXISTS rating INTEGER DEFAULT 5;
+
+-- 2. Delete the problematic old view
+DROP VIEW IF EXISTS products_with_reviews;
+
+-- 3. Create a view that uses a prefix to avoid name clashes
+CREATE VIEW products_with_reviews AS
+SELECT
+  p.*,
+  COALESCE(stats.avg_val, 0)::NUMERIC(10,1) AS calculated_avg,
+  COALESCE(stats.total_revs, 0) AS calculated_count
+FROM public.products p
+LEFT JOIN (
+  SELECT
+    product_id,
+    AVG(rating) as avg_val,
+    COUNT(id) as total_revs
+  FROM public.reviews
+  GROUP BY product_id
+) AS stats ON p.id = stats.product_id;
